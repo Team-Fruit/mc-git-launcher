@@ -28,7 +28,14 @@ ipcMain.handle('c-clone', async (event, dir, url) => {
     singleBranch: true,
     depth: 1
   }).then(() => {
-    return 'SUCCESS!'
+    return {
+      success: true
+    }
+  }).catch(err => {
+    return {
+      success: false,
+      reason: err
+    }
   })
 })
 

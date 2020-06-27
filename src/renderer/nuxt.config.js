@@ -11,27 +11,27 @@ module.exports = {
     title: 'mc-git-launcher'
   },
   loading: false,
-  plugins: [
-    
-    
-    
-  ],
-  buildModules: [
-    
-  ],
+  plugins: [],
+  buildModules: [],
   modules: [
     '@nuxtjs/vuetify',
   ],
-          vuetify: {
-            theme: {
-              themes: {
-                light: {
-                  primary: '#1867c0',
-                  secondary: '#b0bec5',
-                  accent: '#8c9eff',
-                  error: '#b71c1c',
-                },
-              },
-            }
-          }
+  vuetify: {
+    theme: {
+      themes: {
+        light: {
+          primary: '#1867c0',
+          secondary: '#b0bec5',
+          accent: '#8c9eff',
+          error: '#b71c1c',
+        },
+      },
+    }
+  },
+  build: {
+    extend(config, ctx) {
+      if (ctx.isDev && ctx.isClient)
+        config.devtool = 'eval-source-map'
+    }
+  }
 };
