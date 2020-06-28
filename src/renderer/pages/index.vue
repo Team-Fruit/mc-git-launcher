@@ -5,7 +5,7 @@
         cols="12"
       >
         <v-text-field
-          v-model="remote"
+          v-model="data.remote"
           label="Remote URL"
         ></v-text-field>
       </v-col>
@@ -13,15 +13,15 @@
         cols="12"
       >
         <v-text-field
-          v-model="local"
+          v-model="data.local"
           label="Local Path"
         ></v-text-field>
-        <v-btn
-          v-on:click="cloneGit()"
-          :loading="loading"
-          :disabled="loading"
-          outlined
-        >Clone</v-btn>
+        <git-button
+          name="Clone"
+          channel="c-clone"
+          :data="data"
+          @onResult="notification"
+        ></git-button>
       </v-col>
     </v-row>
     <v-snackbar
@@ -45,16 +45,18 @@
 
 <script>
 import { remote, ipcRenderer } from 'electron'
+import gitButton from '~/components/gitButton.vue'
 
 export default {
   components: {
+    gitButton
   },
   data() {
     return {
-      local: 'C:\\softdata\\git\\FruitLauncherV2',
-      remote: 'https://github.com/Team-Fruit/InventoryBan.git',
-      loading: false,
-      result: '',
+      data: {
+        local: 'C:\\softdata\\git\\hello-git',
+        remote: 'https://github.com/kokoa0429/hello-git.git'
+      },
       snackbar: false,
       text: ''
     }
@@ -63,14 +65,7 @@ export default {
     openURL(url) {
       remote.shell.openExternal(url)
     },
-    async cloneGit() {
-      this.loading = true
-      this.result = await ipcRenderer.invoke('c-clone', this.local, this.remote)
-      this.loading = false
-    }
-  },
-  watch: {
-    result: function(newValue) {
+    notification(newValue) {
       this.text = newValue.success ? 'Success!' : 'Failed :-('
       this.snackbar = true
     }
