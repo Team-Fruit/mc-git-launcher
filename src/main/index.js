@@ -19,14 +19,46 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
-ipcMain.handle('c-clone', async (event, dir, url) => {
+ipcMain.handle('c-clone', async (event, data) => {
   return git.clone({
     fs,
     http,
-    dir,
-    url,
+    dir: data.local,
+    url: data.remote,
     singleBranch: true,
-    depth: 1
+    //depth: 1
+  }).then(async () => {
+    await git.setConfig({
+      fs,
+      dir: data.local,
+      path: 'user.name',
+      value: 'Kamesuta'
+    })
+    await git.setConfig({
+      fs,
+      dir: data.local,
+      path: 'user.email',
+      value: 'kamesuta@gmail.com'
+    })
+  }).then(() => {
+    return {
+      success: true
+    }
+  }).catch(err => {
+    return {
+      success: false,
+      reason: err
+    }
+  })
+})
+
+ipcMain.handle('c-pull', async (event, data) => {
+  return git.pull({
+    fs,
+    http,
+    dir: data.local,
+    ref: 'master',
+    singleBranch: true
   }).then(() => {
     return {
       success: true

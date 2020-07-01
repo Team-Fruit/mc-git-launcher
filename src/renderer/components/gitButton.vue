@@ -1,10 +1,10 @@
 <template>
   <v-btn
-    v-on:click="cloneGit()"
+    v-on:click="action()"
     :loading="loading"
     :disabled="loading"
     outlined
-  >Clone
+  >{{name}}
   </v-btn>
 </template>
 
@@ -25,9 +25,9 @@
       }
     },
     methods: {
-      async cloneGit() {
+      async action() {
         this.loading = true
-        this.result = await ipcRenderer.invoke(this.channel, this.data.local, this.data.remote)
+        this.result = await ipcRenderer.invoke(this.channel, this.data)
         this.loading = false
       }
     },

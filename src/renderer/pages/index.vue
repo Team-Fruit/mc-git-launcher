@@ -22,6 +22,12 @@
           :data="data"
           @onResult="notification"
         ></git-button>
+        <git-button
+          name="Pull"
+          channel="c-pull"
+          :data="data"
+          @onResult="notification"
+        ></git-button>
       </v-col>
     </v-row>
     <v-snackbar
@@ -66,7 +72,7 @@ export default {
       remote.shell.openExternal(url)
     },
     notification(newValue) {
-      this.text = newValue.success ? 'Success!' : 'Failed :-('
+      this.text = newValue.success ? 'Success!' : ('Failed: ' + newValue.reason)
       this.snackbar = true
     }
   }
