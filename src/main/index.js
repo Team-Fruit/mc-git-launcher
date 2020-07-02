@@ -71,5 +71,23 @@ ipcMain.handle('c-pull', async (event, data) => {
   })
 })
 
+ipcMain.handle('c-merge', async (event, data) => {
+  return git.merge({
+    fs,
+    dir: data.local,
+    ours: 'master',
+    theirs: '/remotes/origin/master'
+  }).then(() => {
+    return {
+      success: true
+    }
+  }).catch(err => {
+    return {
+      success: false,
+      reason: err
+    }
+  })
+})
+
 // Load here all startup windows
 require('./mainWindow')

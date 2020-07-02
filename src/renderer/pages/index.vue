@@ -28,6 +28,12 @@
           :data="data"
           @onResult="notification"
         ></git-button>
+        <git-button
+          name="Merge"
+          channel="c-merge"
+          :data="data"
+          @onResult="notification"
+        ></git-button>
       </v-col>
     </v-row>
     <v-snackbar
