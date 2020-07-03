@@ -30,13 +30,6 @@ module.exports = {
   },
   build: {
     extend(config, ctx) {
-      config.externals.push(
-        function(context, request, callback) {
-          if(/^nodegit/.test(request))
-            return callback(null, 'commonjs' + " " + request);
-          callback();
-        }
-      )
       if (ctx.isDev && ctx.isClient)
         config.devtool = 'eval-source-map'
     }
