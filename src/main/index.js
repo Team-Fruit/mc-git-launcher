@@ -1,8 +1,7 @@
 /* globals INCLUDE_RESOURCES_PATH */
 import { app, ipcMain } from 'electron'
-import git from 'isomorphic-git'
+import Git from 'nodegit'
 import fs from 'fs'
-import http from 'isomorphic-git/http/node'
 
 /**
  * Set `__resources` path to resources files in renderer process
@@ -20,6 +19,7 @@ app.on('window-all-closed', () => {
 })
 
 ipcMain.handle('c-clone', async (event, data) => {
+  /*
   return git.clone({
     fs,
     http,
@@ -50,9 +50,11 @@ ipcMain.handle('c-clone', async (event, data) => {
       reason: err
     }
   })
+   */
 })
 
 ipcMain.handle('c-pull', async (event, data) => {
+  /*
   return git.pull({
     fs,
     http,
@@ -69,9 +71,11 @@ ipcMain.handle('c-pull', async (event, data) => {
       reason: err
     }
   })
+   */
 })
 
 ipcMain.handle('c-merge', async (event, data) => {
+  /*
   return git.merge({
     fs,
     dir: data.local,
@@ -87,6 +91,7 @@ ipcMain.handle('c-merge', async (event, data) => {
       reason: err
     }
   })
+   */
 })
 
 // Load here all startup windows
