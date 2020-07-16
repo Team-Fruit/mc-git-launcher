@@ -1,18 +1,17 @@
 {
   "name": "mc-git-launcher",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
-    "dev": "nuxt",
-    "build": "nuxt build",
-    "start": "nuxt start",
-    "export": "nuxt export",
-    "serve": "nuxt serve"
+    "dev": "cross-env NODE_ENV=DEV node main.mjs"
   },
   "dependencies": {
     "nuxt": "^2.13.0"
   },
   "devDependencies": {
-    "@nuxtjs/vuetify": "^1.11.2"
+    "@nuxtjs/vuetify": "^1.11.2",
+    "cross-env": "^7.0.2",
+    "electron": "^9.1.0"
   }
 }
