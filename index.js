@@ -11,7 +11,7 @@ const builder = new Builder(nuxt)
 const server = http.createServer(nuxt.render)
 // Build only in dev mode
 let _NUXT_URL_ = '';
-if (config.dev) {
+if (false && config.dev) {
     builder.build().catch(err => {
         console.error(err) // eslint-disable-line no-console
         process.exit(1)
@@ -34,10 +34,16 @@ let win = null // Current window
 const electron = require('electron')
 const app = electron.app
 const newWin = () => {
-    win = new electron.BrowserWindow({})
+    win = new electron.BrowserWindow({
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: false,
+        preload: __dirname + '/preload.js'
+      }
+    })
     // win.maximize()
     win.on('closed', () => win = null)
-    if (config.dev) {
+    if (false && config.dev) {
         // Wait for nuxt to build
         const pollServer = () => {
 
