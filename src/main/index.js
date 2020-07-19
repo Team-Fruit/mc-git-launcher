@@ -3,7 +3,7 @@ const fs = require("fs")
 const git = require('isomorphic-git')
 const http = require('isomorphic-git/http/node')
 
-ipcMain.handle('c-clone', async (event, data) => {
+ipcMain.handle('git.clone', async (event, data) => {
   return git.clone({
     fs,
     http,
@@ -36,7 +36,7 @@ ipcMain.handle('c-clone', async (event, data) => {
   })
 })
 
-ipcMain.handle('c-pull', async (event, data) => {
+ipcMain.handle('git.pull', async (event, data) => {
   return git.pull({
     fs,
     http,
@@ -55,7 +55,7 @@ ipcMain.handle('c-pull', async (event, data) => {
   })
 })
 
-ipcMain.handle('c-diff', async (event, data) => {
+ipcMain.handle('git.diff', async (event, data) => {
   return {
     success: true
   }

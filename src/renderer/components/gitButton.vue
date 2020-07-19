@@ -13,6 +13,7 @@
     name: "gitButton",
     props: [
       'name',
+      'channel',
       'data'
     ],
     data() {
@@ -24,8 +25,7 @@
     methods: {
       async action() {
         this.loading = true
-        this.result = await this.$emit('event', this.data)
-        console.log(this.result)
+        this.result = await api.git(this.channel, this.data)
         this.loading = false
       }
     },

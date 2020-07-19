@@ -18,19 +18,19 @@
         ></v-text-field>
         <git-button
           name="Clone"
-          @event="c_clone"
+          channel="clone"
           :data="data"
           @onResult="notification"
         ></git-button>
         <git-button
           name="Pull"
-          @event="c_pull"
+          channel="pull"
           :data="data"
           @onResult="notification"
         ></git-button>
         <git-button
           name="Diff"
-          @event="c_diff"
+          channel="diff"
           :data="data"
           @onResult="notification"
         ></git-button>
@@ -79,10 +79,7 @@
       notification(newValue) {
         this.text = newValue.success ? 'Success!' : ('Failed: ' + newValue.reason)
         this.snackbar = true
-      },
-      c_clone: async (data) => api.c_clone(data),
-      c_pull: async (data) => api.c_pull(data),
-      c_diff: async (data) => api.c_diff(data),
+      }
     }
   }
 </script>
