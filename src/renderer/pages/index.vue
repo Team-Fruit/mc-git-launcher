@@ -77,7 +77,7 @@
         api.openURL(url)
       },
       notification(newValue) {
-        this.text = newValue.success ? 'Success!' : ('Failed: ' + newValue.reason)
+        this.text = newValue.success ? ('Success: ' + newValue.result) : ('Failed: ' + newValue.reason)
         this.snackbar = true
       }
     }
