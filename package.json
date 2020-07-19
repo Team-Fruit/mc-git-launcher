@@ -1,0 +1,25 @@
+{
+  "name": "nuxt-electron",
+  "version": "1.0.0",
+  "private": true,
+  "main": "entry-point.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development electron . --remote-debugging-port=9222",
+    "build": "cross-env NODE_ENV=production nuxt build ./src/renderer && electron-builder"
+  },
+  "build": {
+    "appId": "nuxt-electron",
+    "directories": {
+      "output": "build"
+    }
+  },
+  "dependencies": {
+    "nuxt": "^2.13.0"
+  },
+  "devDependencies": {
+    "@nuxtjs/vuetify": "^1.11.2",
+    "cross-env": "^7.0.2",
+    "electron": "^9.1.0",
+    "electron-builder": "^22.7.0"
+  }
+}
