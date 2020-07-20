@@ -70,83 +70,104 @@ ipcMain.handle('git.diff', async (event, data) => {
     depth: 1,
     ref: 'origin/master'
   })
-  return git.walk({
-    fs,
-    dir,
-    trees: [git.TREE({ ref: commitA[0].oid }), git.TREE({ ref: commitB[0].oid }), git.WORKDIR()],
-    map: async function(filepath, [A, B, C]) {
-      // ignore directories
-      if (filepath === '.' || filepath.startsWith('.git/')) {
-        return
-      }
-
-      /*
-      if ((A !== null && (await A.type()) === 'tree')
-        || (B !== null && (await B.type()) === 'tree')
-        || (C !== null && (await C.type()) === 'tree')) {
-        return
-      }
-       */
-
-      const fullpath = path.join(dir, filepath)
-
-      return {
-        A,
-        B,
-        C,
-        filepath,
-        fullpath,
-      }
-    }
-  }).then(async changes => {
-    return Promise.all(changes.map(async change => {
-      const {filepath, fullpath} = change
-
-      const {A, B, C} = change
-
-      // generate ids
-      const Aoid = await A?.oid()
-      const Boid = await B?.oid()
-      const Coid = await C?.oid()
-
-      // generate types
-      const Atype = await A?.type()
-      const Btype = await B?.type()
-      const Ctype = await C?.type()
-
-      if (Atype !== Btype) {
-        // removedir
-        if (Atype === 'tree') {
-          await fs.promises.rmdir(fullpath)
+  const fetchChanges = async () => {
+    return git.walk({
+      fs,
+      dir,
+      trees: [git.TREE({ ref: commitA[0].oid }), git.TREE({ ref: commitB[0].oid }), git.WORKDIR()],
+      map: async function(filepath, rawEntries) {
+        return {
+          rawEntries,
+          filepath,
+          fullpath: path.join(dir, filepath),
         }
       }
+    }).then(async changes => {
+      return changes.filter(c => {
+        // ignore directories
+        if (c.filepath === '.' || c.filepath === '.git' || c.filepath.startsWith('.git/')) {
+          return false
+        }
+
+        return true
+      })
+    }).then(async changes => {
+      return Promise.all(changes.map(async c => {
+        return {
+          ...c,
+          entries: await Promise.all(c.rawEntries.map(async entry => {
+            return {
+              obj: entry,
+              data: await entry?.content(),
+              type: await entry?.type(),
+              oid: await entry?.oid(),
+            }
+          }))
+        }
+      }))
+    })
+  }
+  await fetchChanges().then(async changes => {
+    return Promise.all(changes.map(async c => {
+      const [A, B, C] = c.entries
+
+      // removedir
+      if (A.type === 'tree' && B.type !== 'tree') {
+        if (C.type === 'tree')
+          await fs.promises.rmdir(c.fullpath, {recursive: true})
+      }
+
+      // remove
+      if (A.type === 'blob' && B.type !== 'blob') {
+        if (C.type === 'blob')
+          await fs.promises.unlink(c.fullpath)
+      }
+
+      return c
+    }))
+  }).then(async changes => {
+    return Promise.all(changes.map(async c => {
+      const [A, B, C] = c.entries
+
+      // mkdir
+      if (A.type !== 'tree' && B.type === 'tree') {
+        if (C.type !== 'tree')
+          await fs.promises.mkdir(c.fullpath, { recursive: true })
+      }
+
+      return c
+    }))
+  })
+  return fetchChanges().then(async changes => {
+    return Promise.all(changes.map(async c => {
+      const [A, B, C] = c.entries
 
       // determine modification type
-      if (Aoid === Boid) {
+      if (A.oid === B.oid) {
         // equal
-      } else if (B === undefined) {
+      } else if (B.type !== 'blob') {
         // remove
-        if (Ctype === 'blob') {
-          await fs.promises.unlink(fullpath)
+        if (C.type === 'blob') {
+          await fs.promises.unlink(c.fullpath)
           await git.remove({
             fs,
             dir,
-            filepath,
+            filepath: c.filepath,
           })
         }
       } else {
         // add, modify
-        if (Btype === 'blob' && Boid !== Coid) {
-          //await fs.promises.mkdir(path.dirname(fullpath), { recursive: true }).catch()
-          await fs.promises.writeFile(fullpath, await B.content())
+        if (B.type === 'blob' && B.oid !== C.oid) {
+          await fs.promises.writeFile(c.fullpath, B.data)
           await git.add({
             fs,
             dir,
-            filepath,
+            filepath: c.filepath,
           })
         }
       }
-      return change
+
+      return c
     }))
   }).then(async result => {
     const commit = commitB[0].oid
