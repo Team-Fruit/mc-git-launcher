@@ -88,20 +88,12 @@ ipcMain.handle('git.diff', async (event, data) => {
       }
        */
 
-      // generate ids
-      const Aoid = A === null ? undefined : await A.oid()
-      const Boid = B === null ? undefined : await B.oid()
-      const Coid = C === null ? undefined : await C.oid()
-
       const fullpath = path.join(dir, filepath)
 
       return {
         A,
         B,
         C,
-        Aoid,
-        Boid,
-        Coid,
         filepath,
         fullpath,
       }
@@ -109,19 +101,33 @@ ipcMain.handle('git.diff', async (event, data) => {
   }).then(async changes => {
     return Promise.all(changes.map(async change => {
       const {filepath, fullpath} = change
+
+      const {A, B, C} = change
+
+      // generate ids
+      const Aoid = await A?.oid()
+      const Boid = await B?.oid()
+      const Coid = await C?.oid()
+
+      // generate types
+      const Atype = await A?.type()
+      const Btype = await B?.type()
+      const Ctype = await C?.type()
+
+      if (Atype !== Btype) {
+        // removedir
+        if (Atype === 'tree') {
+          await fs.promises.rmdir(fullpath)
+        }
+      }
+
       // determine modification type
-      if (change.Aoid === undefined && change.Boid === undefined) {
-        // unknown
-        console.log('Something weird happened:')
-        console.log(change.A)
-        console.log(change.B)
-        console.log(change.C)
-      } else if (change.Aoid === change.Boid) {
+      if (Aoid === Boid) {
         // equal
-      } else if (change.Boid === undefined) {
+      } else if (B === undefined) {
         // remove
-        if (change.Coid !== undefined) {
-          await fs.promises.unlink(fullpath).catch()
+        if (Ctype === 'blob') {
+          await fs.promises.unlink(fullpath)
           await git.remove({
             fs,
             dir,
@@ -130,8 +136,9 @@ ipcMain.handle('git.diff', async (event, data) => {
         }
       } else {
         // add, modify
-        if (change.Boid != change.Coid) {
-          await fs.promises.writeFile(fullpath, await change.B.content())
+        if (Btype === 'blob' && Boid !== Coid) {
+          //await fs.promises.mkdir(path.dirname(fullpath), { recursive: true }).catch()
+          await fs.promises.writeFile(fullpath, await B.content())
           await git.add({
             fs,
             dir,
@@ -152,7 +159,7 @@ ipcMain.handle('git.diff', async (event, data) => {
       result: JSON.stringify(result),
     }
   }).catch(err => {
-    console.error(err)
+    console.log('Error: ', err)
     return {
       success: false,
       reason: err,
