@@ -37,26 +37,7 @@ ipcMain.handle('git.clone', async (event, data) => {
   })
 })
 
-ipcMain.handle('git.pull', async (event, data) => {
-  return git.pull({
-    fs,
-    http,
-    dir: data.local,
-    ref: 'master',
-    singleBranch: true
-  }).then(() => {
-    return {
-      success: true
-    }
-  }).catch(err => {
-    return {
-      success: false,
-      reason: err
-    }
-  })
-})
-
-ipcMain.handle('git.diff', async (event, data) => {
+ipcMain.handle('git.update', async (event, data) => {
   const dir = data.local
   const commitA = await git.log({
     fs,

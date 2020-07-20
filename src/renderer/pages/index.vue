@@ -23,14 +23,8 @@
           @onResult="notification"
         ></git-button>
         <git-button
-          name="Pull"
-          channel="pull"
-          :data="data"
-          @onResult="notification"
-        ></git-button>
-        <git-button
-          name="Diff"
-          channel="diff"
+          name="Update"
+          channel="update"
           :data="data"
           @onResult="notification"
         ></git-button>
