@@ -10,7 +10,7 @@
 
 <script>
   export default {
-    name: "gitButton",
+    name: "actionButton",
     props: [
       'name',
       'channel',
@@ -25,7 +25,7 @@
     methods: {
       async action() {
         this.loading = true
-        this.result = await api.git(this.channel, this.data)
+        this.result = await api.action(this.channel, this.data)
         this.loading = false
       }
     },

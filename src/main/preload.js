@@ -2,8 +2,8 @@ const {contextBridge, ipcRenderer} = require("electron");
 
 contextBridge.exposeInMainWorld(
   "api", {
-    async git(channel, ...args) {
-      return ipcRenderer.invoke("git." + channel, ...args);
-    }
+    async action(channel, ...args) {
+      return ipcRenderer.invoke("mcgit." + channel, ...args);
+    },
   }
 );

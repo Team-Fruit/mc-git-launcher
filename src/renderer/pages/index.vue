@@ -16,30 +16,30 @@
           v-model="data.local"
           label="Local Path"
         ></v-text-field>
-        <git-button
+        <action-button
           name="Clone"
           channel="clone"
           :data="data"
           @onResult="notification"
-        ></git-button>
-        <git-button
+        ></action-button>
+        <action-button
           name="Fetch"
           channel="fetch"
           :data="data"
           @onResult="notification"
-        ></git-button>
-        <git-button
+        ></action-button>
+        <action-button
           name="Update"
           channel="update"
           :data="data"
           @onResult="notification"
-        ></git-button>
-        <git-button
+        ></action-button>
+        <action-button
           name="ForceUpdate"
           channel="update.force"
           :data="data"
           @onResult="notification"
-        ></git-button>
+        ></action-button>
       </v-col>
     </v-row>
     <v-snackbar
@@ -62,11 +62,11 @@
 </template>
 
 <script>
-  import gitButton from '~/components/gitButton.vue'
+  import actionButton from '~/components/actionButton.vue'
 
   export default {
     components: {
-      gitButton
+      actionButton
     },
     data() {
       return {
@@ -79,9 +79,6 @@
       }
     },
     methods: {
-      openURL(url) {
-        api.openURL(url)
-      },
       notification(newValue) {
         this.text = newValue.success ? ('Success: ' + newValue.result) : ('Failed: ' + newValue.reason)
         this.snackbar = true
