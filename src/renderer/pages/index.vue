@@ -16,6 +16,26 @@
           v-model="data.local"
           label="Local Path"
         ></v-text-field>
+      </v-col>
+      <v-col
+        cols="12"
+      >
+        <v-text-field
+          v-model="data.mc.email"
+          label="Minecraft Email"
+        ></v-text-field>
+      </v-col>
+      <v-col
+        cols="12"
+      >
+        <v-text-field
+          v-model="data.mc.password"
+          label="Minecraft Password"
+        ></v-text-field>
+      </v-col>
+      <v-col
+        cols="12"
+      >
         <action-button
           name="Clone"
           channel="clone"
@@ -37,6 +57,12 @@
         <action-button
           name="ForceUpdate"
           channel="update.force"
+          :data="data"
+          @onResult="notification"
+        ></action-button>
+        <action-button
+          name="Launch"
+          channel="launch"
           :data="data"
           @onResult="notification"
         ></action-button>
@@ -72,7 +98,11 @@
       return {
         data: {
           local: 'C:\\softdata\\git\\hello-git',
-          remote: 'https://github.com/kokoa0429/hello-git.git'
+          remote: 'https://github.com/kokoa0429/hello-git.git',
+          mc: {
+            email: '',
+            password: '',
+          },
         },
         snackbar: false,
         text: ''

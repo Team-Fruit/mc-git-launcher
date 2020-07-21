@@ -17,8 +17,9 @@
     "@types/node": "^14.0.23"
   },
   "dependencies": {
-    "nuxt": "^2.13.0",
-    "isomorphic-git": "^1.7.3"
+    "isomorphic-git": "^1.7.3",
+    "minecraft-launcher-core": "^3.14.4",
+    "nuxt": "^2.13.0"
   },
   "devDependencies": {
     "@nuxtjs/vuetify": "^1.11.2",
