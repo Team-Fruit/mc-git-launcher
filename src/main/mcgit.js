@@ -4,7 +4,7 @@ const git = require('isomorphic-git')
 const http = require('isomorphic-git/http/node')
 
 module.exports = {
-  async clone({dir, url}) {
+  async clone({dir, url, ours}) {
     const repo = {
       fs,
       dir,
@@ -13,7 +13,7 @@ module.exports = {
       ...repo,
       http,
       url,
-      ref: 'master',
+      ref: ours,
       singleBranch: true,
       //depth: 1,
     }).then(() => {
@@ -23,11 +23,11 @@ module.exports = {
     }).catch(err => {
       return {
         success: false,
-        reason: err
+        reason: err,
       }
     })
   },
-  async fetch({dir, url}) {
+  async fetch({dir, url, ours}) {
     const repo = {
       fs,
       dir,
@@ -36,7 +36,7 @@ module.exports = {
       ...repo,
       http,
       url,
-      ref: 'master',
+      ref: ours,
       singleBranch: true,
       //depth: 1,
     }).then(() => {
@@ -113,7 +113,8 @@ module.exports = {
       }))
     })
   },
-  async updateHard({dir}) {
+  async updateHard({dir, ours}) {
+    const theirs = `origin/${ours}`
     const repo = {
       fs,
       dir,
@@ -121,17 +122,17 @@ module.exports = {
     try {
       await git.merge({
         ...repo,
-        ours: 'master',
-        theirs: 'origin/master',
+        ours,
+        theirs,
         fastForwardOnly: true,
       })
       await this.prepareWorkDir({
         ...repo,
-        ref: 'master',
+        ref: ours,
       })
       await git.statusMatrix({
         ...repo,
-        ref: 'master'
+        ref: ours
       }).then((status) =>
         Promise.all(status.map(([filepath, , worktreeStatus]) =>
           worktreeStatus
@@ -141,7 +142,7 @@ module.exports = {
       )
       await git.checkout({
         ...repo,
-        ref: 'master',
+        ref: ours,
         force: true,
       })
       return {
@@ -156,7 +157,8 @@ module.exports = {
       }
     }
   },
-  async updateSoft({dir}) {
+  async updateSoft({dir, ours}) {
+    const theirs = `origin/${ours}`
     const repo = {
       fs,
       dir,
@@ -164,16 +166,16 @@ module.exports = {
     const commitA = await git.log({
       ...repo,
       depth: 1,
-      ref: 'master'
+      ref: ours,
     })
     const commitB = await git.log({
       ...repo,
       depth: 1,
-      ref: 'origin/master'
+      ref: theirs,
     })
     await this.prepareWorkDir({
       ...repo,
-      ref: 'origin/master'
+      ref: theirs,
     })
     return git.walk({
       ...repo,
@@ -228,7 +230,7 @@ module.exports = {
       }))
     }).then(async result => {
       const commit = commitB[0].oid
-      await fs.promises.writeFile(path.join(dir, `/.git/refs/heads/master`), commit);
+      await fs.promises.writeFile(path.join(dir, `/.git/refs/heads/${ours}`), commit);
       return result
     }).then(result => {
       console.log(result)
