@@ -59,6 +59,64 @@ ipcMain.handle('git.fetch', async (event, data) => {
   })
 })
 
+async function prepareWorkDir({fs, dir, ref}) {
+  const commitA = await git.log({
+    fs,
+    dir,
+    depth: 1,
+    ref,
+  })
+  await git.walk({
+    fs,
+    dir,
+    trees: [git.WORKDIR(), git.TREE({ref: commitA[0].oid})],
+    map: async function (filepath, rawEntries) {
+      return {
+        rawEntries,
+        filepath,
+        fullpath: path.join(dir, filepath),
+      }
+    }
+  }).then(async changes => {
+    return changes.filter(c => {
+      // ignore directories
+      if (c.filepath === '.' || c.filepath === '.git' || c.filepath.startsWith('.git/')) {
+        return false
+      }
+
+      return true
+    })
+  }).then(async changes => {
+    return Promise.all(changes.map(async c => {
+      return {
+        ...c,
+        entries: await Promise.all(c.rawEntries.map(async entry => {
+          return {
+            obj: entry,
+            type: await entry?.type(),
+          }
+        }))
+      }
+    }))
+  }).then(async changes => {
+    return Promise.all(changes.map(async c => {
+      const [A, B] = c.entries
+
+      // removedir
+      if (A.type === 'tree' && B.type !== 'tree') {
+        await fs.promises.rmdir(c.fullpath, {recursive: true})
+      }
+
+      // remove
+      if (A.type === 'blob' && B.type !== 'blob') {
+        await fs.promises.unlink(c.fullpath)
+      }
+
+      return c
+    }))
+  })
+}
+
 ipcMain.handle('git.update.force', async (event, data) => {
   const dir = data.local
   try {
@@ -72,11 +130,15 @@ ipcMain.handle('git.update.force', async (event, data) => {
       theirs: 'origin/master',
       fastForwardOnly: true,
     })
+    await prepareWorkDir({
+      ...repo,
+      ref: 'master',
+    })
     await git.statusMatrix({
       ...repo,
       ref: 'master'
     }).then((status) =>
-      Promise.all(status.map(([filepath, headStatus, worktreeStatus, stageStatus]) =>
+      Promise.all(status.map(([filepath, , worktreeStatus]) =>
         worktreeStatus
           ? git.add({...repo, filepath})
           : git.remove({...repo, filepath})
