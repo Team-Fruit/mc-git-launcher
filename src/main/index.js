@@ -60,44 +60,35 @@ ipcMain.handle('git.fetch', async (event, data) => {
 })
 
 async function prepareWorkDir({fs, dir, ref}) {
-  const commitA = await git.log({
+  const repo = {
     fs,
     dir,
+  }
+  const commitA = await git.log({
+    ...repo,
     depth: 1,
     ref,
   })
   await git.walk({
-    fs,
-    dir,
+    ...repo,
     trees: [git.WORKDIR(), git.TREE({ref: commitA[0].oid})],
     map: async function (filepath, rawEntries) {
+      if (filepath === '.')
+        return undefined
+      if (filepath === '.git')
+        return null
       return {
         rawEntries,
-        filepath,
-        fullpath: path.join(dir, filepath),
-      }
-    }
-  }).then(async changes => {
-    return changes.filter(c => {
-      // ignore directories
-      if (c.filepath === '.' || c.filepath === '.git' || c.filepath.startsWith('.git/')) {
-        return false
-      }
-
-      return true
-    })
-  }).then(async changes => {
-    return Promise.all(changes.map(async c => {
-      return {
-        ...c,
-        entries: await Promise.all(c.rawEntries.map(async entry => {
+        entries: await Promise.all(rawEntries.map(async entry => {
           return {
             obj: entry,
             type: await entry?.type(),
           }
-        }))
+        })),
+        filepath,
+        fullpath: path.join(dir, filepath),
       }
-    }))
+    }
   }).then(async changes => {
     return Promise.all(changes.map(async c => {
       const [A, B] = c.entries
@@ -110,6 +101,21 @@ async function prepareWorkDir({fs, dir, ref}) {
       // remove
       if (A.type === 'blob' && B.type !== 'blob') {
         await fs.promises.unlink(c.fullpath)
+        await git.remove({
+          ...repo,
+          filepath: c.filepath,
+        })
+      }
+
+      return c
+    }))
+  }).then(async changes => {
+    return Promise.all(changes.map(async c => {
+      const [A, B] = c.entries
+
+      // mkdir
+      if (A.type !== 'tree' && B.type === 'tree') {
+        await fs.promises.mkdir(c.fullpath, {recursive: true})
       }
 
       return c
@@ -119,11 +125,11 @@ async function prepareWorkDir({fs, dir, ref}) {
 
 ipcMain.handle('git.update.force', async (event, data) => {
   const dir = data.local
+  const repo = {
+    fs,
+    dir,
+  }
   try {
-    const repo = {
-      fs,
-      dir,
-    }
     await git.merge({
       ...repo,
       ours: 'master',
@@ -164,87 +170,47 @@ ipcMain.handle('git.update.force', async (event, data) => {
 
 ipcMain.handle('git.update', async (event, data) => {
   const dir = data.local
-  const commitA = await git.log({
+  const repo = {
     fs,
     dir,
+  }
+  const commitA = await git.log({
+    ...repo,
     depth: 1,
     ref: 'master'
   })
   const commitB = await git.log({
-    fs,
-    dir,
+    ...repo,
     depth: 1,
     ref: 'origin/master'
   })
-  const fetchChanges = async () => {
-    return git.walk({
-      fs,
-      dir,
-      trees: [git.TREE({ref: commitA[0].oid}), git.TREE({ref: commitB[0].oid}), git.WORKDIR()],
-      map: async function (filepath, rawEntries) {
-        return {
-          rawEntries,
-          filepath,
-          fullpath: path.join(dir, filepath),
-        }
-      }
-    }).then(async changes => {
-      return changes.filter(c => {
-        // ignore directories
-        if (c.filepath === '.' || c.filepath === '.git' || c.filepath.startsWith('.git/')) {
-          return false
-        }
-
-        return true
-      })
-    }).then(async changes => {
-      return Promise.all(changes.map(async c => {
-        return {
-          ...c,
-          entries: await Promise.all(c.rawEntries.map(async entry => {
-            return {
-              obj: entry,
-              data: await entry?.content(),
-              type: await entry?.type(),
-              oid: await entry?.oid(),
-            }
-          }))
-        }
-      }))
-    })
-  }
-  await fetchChanges().then(async changes => {
-    return Promise.all(changes.map(async c => {
-      const [A, B, C] = c.entries
-
-      // removedir
-      if (A.type === 'tree' && B.type !== 'tree') {
-        if (C.type === 'tree')
-          await fs.promises.rmdir(c.fullpath, {recursive: true})
-      }
-
-      // remove
-      if (A.type === 'blob' && B.type !== 'blob') {
-        if (C.type === 'blob')
-          await fs.promises.unlink(c.fullpath)
-      }
-
-      return c
-    }))
-  }).then(async changes => {
-    return Promise.all(changes.map(async c => {
-      const [A, B, C] = c.entries
-
-      // mkdir
-      if (A.type !== 'tree' && B.type === 'tree') {
-        if (C.type !== 'tree')
-          await fs.promises.mkdir(c.fullpath, {recursive: true})
-      }
-
-      return c
-    }))
+  await prepareWorkDir({
+    ...repo,
+    ref: 'origin/master'
   })
-  return fetchChanges().then(async changes => {
+  return git.walk({
+    ...repo,
+    trees: [git.TREE({ref: commitA[0].oid}), git.TREE({ref: commitB[0].oid}), git.WORKDIR()],
+    map: async function (filepath, rawEntries) {
+      if (filepath === '.')
+        return undefined
+      if (filepath === '.git')
+        return null
+      return {
+        rawEntries,
+        entries: await Promise.all(rawEntries.map(async entry => {
+          return {
+            obj: entry,
+            data: await entry?.content(),
+            type: await entry?.type(),
+            oid: await entry?.oid(),
+          }
+        })),
+        filepath,
+        fullpath: path.join(dir, filepath),
+      }
+    }
+  }).then(async changes => {
     return Promise.all(changes.map(async c => {
       const [A, B, C] = c.entries
 
@@ -256,8 +222,7 @@ ipcMain.handle('git.update', async (event, data) => {
         if (C.type === 'blob') {
           await fs.promises.unlink(c.fullpath)
           await git.remove({
-            fs,
-            dir,
+            ...repo,
             filepath: c.filepath,
           })
         }
@@ -266,8 +231,7 @@ ipcMain.handle('git.update', async (event, data) => {
         if (B.type === 'blob' && B.oid !== C.oid) {
           await fs.promises.writeFile(c.fullpath, B.data)
           await git.add({
-            fs,
-            dir,
+            ...repo,
             filepath: c.filepath,
           })
         }
