@@ -23,8 +23,20 @@
           @onResult="notification"
         ></git-button>
         <git-button
+          name="Fetch"
+          channel="fetch"
+          :data="data"
+          @onResult="notification"
+        ></git-button>
+        <git-button
           name="Update"
           channel="update"
+          :data="data"
+          @onResult="notification"
+        ></git-button>
+        <git-button
+          name="ForceUpdate"
+          channel="update.force"
           :data="data"
           @onResult="notification"
         ></git-button>

@@ -10,8 +10,9 @@ ipcMain.handle('git.clone', async (event, data) => {
     http,
     dir: data.local,
     url: data.remote,
+    ref: 'master',
     singleBranch: true,
-    //depth: 1
+    //depth: 1,
   }).then(async () => {
     await git.setConfig({
       fs,
@@ -37,6 +38,68 @@ ipcMain.handle('git.clone', async (event, data) => {
   })
 })
 
+ipcMain.handle('git.fetch', async (event, data) => {
+  return await git.fetch({
+    fs,
+    http,
+    dir: data.local,
+    url: data.remote,
+    ref: 'master',
+    singleBranch: true,
+    //depth: 1,
+  }).then(() => {
+    return {
+      success: true
+    }
+  }).catch(err => {
+    return {
+      success: false,
+      reason: err
+    }
+  })
+})
+
+ipcMain.handle('git.update.force', async (event, data) => {
+  const dir = data.local
+  try {
+    const repo = {
+      fs,
+      dir,
+    }
+    await git.merge({
+      ...repo,
+      ours: 'master',
+      theirs: 'origin/master',
+      fastForwardOnly: true,
+    })
+    await git.statusMatrix({
+      ...repo,
+      ref: 'master'
+    }).then((status) =>
+      Promise.all(status.map(([filepath, headStatus, worktreeStatus, stageStatus]) =>
+        worktreeStatus
+          ? git.add({...repo, filepath})
+          : git.remove({...repo, filepath})
+      ))
+    )
+    await git.checkout({
+      ...repo,
+      ref: 'master',
+      force: true,
+    })
+    return {
+      success: true,
+      result: 'SUSHI',
+    }
+  } catch (err) {
+    console.log('Error: ', err)
+    return {
+      success: false,
+      reason: err,
+    }
+  }
+})
+
 ipcMain.handle('git.update', async (event, data) => {
   const dir = data.local
   const commitA = await git.log({
@@ -55,8 +118,8 @@ ipcMain.handle('git.update', async (event, data) => {
     return git.walk({
       fs,
       dir,
-      trees: [git.TREE({ ref: commitA[0].oid }), git.TREE({ ref: commitB[0].oid }), git.WORKDIR()],
-      map: async function(filepath, rawEntries) {
+      trees: [git.TREE({ref: commitA[0].oid}), git.TREE({ref: commitB[0].oid}), git.WORKDIR()],
+      map: async function (filepath, rawEntries) {
         return {
           rawEntries,
           filepath,
@@ -113,7 +176,7 @@ ipcMain.handle('git.update', async (event, data) => {
       // mkdir
       if (A.type !== 'tree' && B.type === 'tree') {
         if (C.type !== 'tree')
-          await fs.promises.mkdir(c.fullpath, { recursive: true })
+          await fs.promises.mkdir(c.fullpath, {recursive: true})
       }
 
       return c
