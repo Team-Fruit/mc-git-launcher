@@ -41,7 +41,12 @@ ipcMain.handle('mcgit.launch', async (event, data) => {
     // handling authentication outside before you initialize
     // MCLC so you can handle auth based errors and validation!
     authorization: Authenticator.getAuth(data.mc.email, data.mc.password),
-    root: "./minecraft",
+    root: data.local,
+    overrides: {
+      directory: "./minecraft", // where the Minecraft jar and version json are located.
+      natives: "./minecraft/natives", // native directory path.
+      assetRoot: "./minecraft/assets"
+    },
     version: {
       number: "1.15.2",
       type: "release"
