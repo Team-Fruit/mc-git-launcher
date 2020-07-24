@@ -1,6 +1,7 @@
 const {ipcMain} = require('electron')
+const path = require('path')
 const mcgit = require('./mcgit')
-const { Client, Authenticator } = require('minecraft-launcher-core');
+const {Client, Authenticator} = require('minecraft-launcher-core');
 const launcher = new Client();
 
 ipcMain.handle('mcgit.clone', async (event, data) => {
@@ -36,17 +37,8 @@ ipcMain.handle('mcgit.update', async (event, data) => {
 ipcMain.handle('mcgit.launch', async (event, data) => {
   let opts = {
     clientPackage: null,
-    // For production launchers, I recommend not passing
-    // the getAuth function through the authorization field and instead
-    // handling authentication outside before you initialize
-    // MCLC so you can handle auth based errors and validation!
     authorization: Authenticator.getAuth(data.mc.email, data.mc.password),
     root: data.local,
-    overrides: {
-      directory: "./minecraft", // where the Minecraft jar and version json are located.
-      natives: "./minecraft/natives", // native directory path.
-      assetRoot: "./minecraft/assets"
-    },
     version: {
       number: "1.15.2",
       type: "release"
@@ -55,6 +47,12 @@ ipcMain.handle('mcgit.launch', async (event, data) => {
       max: "6000",
       min: "4000"
     }
+  }
+  opts.overrides = {
+    directory: path.resolve(path.join('minecraft/versions', opts.version.number)), // where the Minecraft jar and version json are located.
+    natives: path.resolve('minecraft/natives'), // native directory path.
+    assetRoot: path.resolve('minecraft/assets'),
+    libraryRoot: path.resolve('minecraft/libraries'),
   }
 
   launcher.on('debug', (e) => console.log(e));

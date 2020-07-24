@@ -23,6 +23,7 @@
         <v-text-field
           v-model="data.mc.email"
           label="Minecraft Email"
+          hint="Minecraft Email"
         ></v-text-field>
       </v-col>
       <v-col
@@ -31,6 +32,12 @@
         <v-text-field
           v-model="data.mc.password"
           label="Minecraft Password"
+          :append-icon="password.show ? 'mdi-eye' : 'mdi-eye-off'"
+          :rules="[password.required]"
+          :type="password.show ? 'text' : 'password'"
+          name="input-10-1"
+          counter
+          @click:append="password.show = !password.show"
         ></v-text-field>
       </v-col>
       <v-col
@@ -105,7 +112,11 @@
           },
         },
         snackbar: false,
-        text: ''
+        text: '',
+        password: {
+          show: false,
+          required: value => !!value || 'Required.',
+        },
       }
     },
     methods: {
