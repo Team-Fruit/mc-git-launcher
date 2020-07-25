@@ -2,7 +2,10 @@ const {ipcMain} = require('electron')
 const path = require('path')
 const mcgit = require('./mcgit')
 const {Client, Authenticator} = require('minecraft-launcher-core');
+
 const launcher = new Client();
+launcher.on('debug', (e) => console.log(e));
+launcher.on('data', (e) => console.log(e));
 
 ipcMain.handle('mcgit.clone', async (event, data) => {
   return mcgit.clone({
@@ -40,7 +43,7 @@ ipcMain.handle('mcgit.launch', async (event, data) => {
     authorization: Authenticator.getAuth(data.mc.email, data.mc.password),
     root: data.local,
     version: {
-      number: "1.15.2",
+      number: data.version,
       type: "release"
     },
     memory: {
@@ -50,13 +53,10 @@ ipcMain.handle('mcgit.launch', async (event, data) => {
   }
   opts.overrides = {
     directory: path.resolve(path.join('minecraft/versions', opts.version.number)), // where the Minecraft jar and version json are located.
-    natives: path.resolve('minecraft/natives'), // native directory path.
+    natives: path.resolve('minecraft/bin', opts.version.number), // native directory path.
     assetRoot: path.resolve('minecraft/assets'),
     libraryRoot: path.resolve('minecraft/libraries'),
   }
-
-  launcher.on('debug', (e) => console.log(e));
-  launcher.on('data', (e) => console.log(e));
 
   return launcher.launch(opts).then(result => {
     console.log(result)

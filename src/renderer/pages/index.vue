@@ -43,6 +43,15 @@
       <v-col
         cols="12"
       >
+        <v-text-field
+          v-model="data.version"
+          label="Minecraft Version"
+          hint="Minecraft Version"
+        ></v-text-field>
+      </v-col>
+      <v-col
+        cols="12"
+      >
         <action-button
           name="Clone"
           channel="clone"
@@ -110,6 +119,7 @@
             email: '',
             password: '',
           },
+          version: '1.7.10',
         },
         snackbar: false,
         text: '',
