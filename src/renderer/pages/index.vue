@@ -23,7 +23,6 @@
         <v-text-field
           v-model="data.mc.email"
           label="Minecraft Email"
-          hint="Minecraft Email"
         ></v-text-field>
       </v-col>
       <v-col
@@ -46,7 +45,14 @@
         <v-text-field
           v-model="data.version"
           label="Minecraft Version"
-          hint="Minecraft Version"
+        ></v-text-field>
+      </v-col>
+      <v-col
+        cols="12"
+      >
+        <v-text-field
+          v-model="data.forge"
+          label="Forge"
         ></v-text-field>
       </v-col>
       <v-col
@@ -119,7 +125,8 @@
             email: '',
             password: '',
           },
-          version: '1.7.10',
+          version: '1.15.2',
+          forge: 'forge/forge-1.15.2-31.2.31-installer.jar',
         },
         snackbar: false,
         text: '',

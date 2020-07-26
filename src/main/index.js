@@ -39,9 +39,9 @@ ipcMain.handle('mcgit.update', async (event, data) => {
 
 ipcMain.handle('mcgit.launch', async (event, data) => {
   let opts = {
-    clientPackage: null,
     authorization: Authenticator.getAuth(data.mc.email, data.mc.password),
     root: data.local,
+    forge: path.join(data.local, data.forge),
     version: {
       number: data.version,
       type: "release"
