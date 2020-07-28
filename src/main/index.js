@@ -51,18 +51,22 @@ async function findForge(dir) {
 }
 
 ipcMain.handle('mcgit.launch', async (event, data) => {
+  const auth = Authenticator.getAuth(data.mc.email, data.mc.password)
+  const forge = await findForge(data.local)
+  const modpackOpts = JSON.parse(await fs.readFile(path.join(data.local, 'modpack.json'), 'utf8'))
+  const userOpts = await fs.readFile(path.join(data.local, 'modpack.user.json'))
+    .then(e => JSON.parse(e, 'utf8'))
+    .catch(err => ({}))
   const opts = {
-    authorization: Authenticator.getAuth(data.mc.email, data.mc.password),
-    root: data.local,
-    forge: await findForge(data.local),
-    version: {
-      number: data.version,
-      type: "release"
-    },
+    forge: forge,
     memory: {
-      max: "6000",
-      min: "4000"
-    }
+      max: "4000",
+      min: "1000"
+    },
+    ...modpackOpts,
+    ...userOpts,
+    authorization: auth,
+    root: data.local,
   }
   opts.overrides = {
     directory: path.resolve(path.join('minecraft/versions', opts.version.number)), // where the Minecraft jar and version json are located.
