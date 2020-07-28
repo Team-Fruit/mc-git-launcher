@@ -1,4 +1,5 @@
 const {ipcMain} = require('electron')
+const fs = require('fs').promises
 const path = require('path')
 const mcgit = require('./mcgit')
 const {Client, Authenticator} = require('minecraft-launcher-core');
@@ -37,11 +38,23 @@ ipcMain.handle('mcgit.update', async (event, data) => {
   })
 })
 
+async function findForge(dir) {
+  const forgeDir = path.join(dir, 'forge')
+  const forgeDirCont = await fs.readdir(forgeDir).catch(err => undefined)
+  if (forgeDirCont === undefined)
+    return undefined
+  const forgeFile = forgeDirCont.find(elm => elm.match(/.*\.jar/ig))
+  if (forgeFile === undefined)
+    return undefined
+  const forgePath = path.join(forgeDir, forgeFile)
+  return forgePath
+}
+
 ipcMain.handle('mcgit.launch', async (event, data) => {
-  let opts = {
+  const opts = {
     authorization: Authenticator.getAuth(data.mc.email, data.mc.password),
     root: data.local,
-    forge: path.join(data.local, data.forge),
+    forge: await findForge(data.local),
     version: {
       number: data.version,
       type: "release"
