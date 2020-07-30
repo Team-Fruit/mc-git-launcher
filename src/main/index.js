@@ -2,6 +2,7 @@ const {ipcMain} = require('electron')
 const fs = require('fs').promises
 const path = require('path')
 const mcgit = require('./mcgit')
+const {JavaSetup} = require('./install-java')
 const {Client, Authenticator} = require('minecraft-launcher-core');
 
 const launcher = new Client();
@@ -50,6 +51,25 @@ async function findForge(dir) {
   return forgePath
 }
 
+ipcMain.handle('mcgit.java', async (event, data) => {
+  return new JavaSetup({
+    userData: path.resolve(path.join('minecraft'))
+  }).installJava()
+    .then(result => {
+      console.log(result)
+      return {
+        success: true,
+        result: 'OK!',
+      }
+    }).catch(err => {
+      console.log('Error: ', err)
+      return {
+        success: false,
+        reason: err,
+      }
+    })
+})
+
 ipcMain.handle('mcgit.launch', async (event, data) => {
   const auth = Authenticator.getAuth(data.mc.email, data.mc.password)
   const forge = await findForge(data.local)
@@ -87,5 +107,5 @@ ipcMain.handle('mcgit.launch', async (event, data) => {
       success: false,
       reason: err,
     }
-  });
+  })
 })

@@ -17,7 +17,9 @@
     "@types/node": "^14.0.23"
   },
   "dependencies": {
+    "adm-zip": "^0.4.16",
     "axios": "^0.19.2",
+    "fs-extra": "^9.0.1",
     "fs-readstream-progress": "0.0.5",
     "isomorphic-git": "^1.7.3",
     "make-dir": "^3.1.0",

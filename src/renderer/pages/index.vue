@@ -83,6 +83,12 @@
           @onResult="notification"
         ></action-button>
         <action-button
+          name="Install Java"
+          channel="java"
+          :data="data"
+          @onResult="notification"
+        ></action-button>
+        <action-button
           name="Launch"
           channel="launch"
           :data="data"
