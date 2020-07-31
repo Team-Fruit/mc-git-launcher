@@ -86,7 +86,7 @@ class JavaSetup extends EventEmitter {
     const downloadLocation = path.join(this.tempFolder, path.basename(url));
 
     await this.downloadFile(downloadLocation, url, p => {
-      ipcRenderer.invoke('update-progress-bar', parseInt(p, 10) / 100);
+      // ipcRenderer.invoke('update-progress-bar', parseInt(p, 10) / 100);
       // setDownloadPercentage(parseInt(p, 10));
     });
 
@@ -98,24 +98,21 @@ class JavaSetup extends EventEmitter {
 
     // setCurrentStep(`Extracting 1 / ${totalSteps}`);
 
-    const gunzip = zlib.createGunzip();
-    const extractor = tar.extract({path: this.tempFolder});
-    const firstExtraction = progress(downloadLocation).pipe(gunzip).pipe(extractor);
-
-    new Zip(downloadLocation).extractAllTo(this.tempFolder, true)
-
-    await new Promise((resolve, reject) => {
-      firstExtraction.on('progress', ({percent}) => {
-        ipcRenderer.invoke('update-progress-bar', percent);
-        // setDownloadPercentage(percent);
+    if (downloadLocation.endsWith(".tar.gz")) {
+      const gunzip = zlib.createGunzip();
+      const extractor = tar.extract({path: this.tempFolder});
+      const firstExtraction = fs.createReadStream(downloadLocation).pipe(gunzip).pipe(extractor);
+      await new Promise((resolve, reject) => {
+        firstExtraction.on('end', () => {
+          resolve();
+        });
+        firstExtraction.on('error', err => {
+          reject(err);
+        });
       });
-      firstExtraction.on('end', () => {
-        resolve();
-      });
-      firstExtraction.on('error', err => {
-        reject(err);
-      });
-    });
+    } else {
+      new Zip(downloadLocation).extractAllTo(this.tempFolder, true)
+    }
 
     await fse.remove(downloadLocation);
 
