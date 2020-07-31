@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: 14
 
+      - name: Install Snapcraft
+        uses: samuelmeuli/action-snapcraft@v1
+
       - run: npm install --no-optional
 
       - name: Build/release Electron app
