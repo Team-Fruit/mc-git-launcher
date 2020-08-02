@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-electron",
+  "name": "mc-git-launcher",
   "version": "1.0.0",
   "private": true,
   "main": "entry-point.js",
@@ -9,9 +9,19 @@
     "build": "electron-builder"
   },
   "build": {
-    "appId": "nuxt-electron",
+    "appId": "mc-git-launcher",
     "directories": {
       "output": "build"
+    },
+    "win": {
+      "publish": "github"
+    },
+    "mac": {
+      "category": "public.app-category.utilities",
+      "publish": "github"
+    },
+    "snap": {
+      "publish": "github"
     }
   },
   "resolutions": {
