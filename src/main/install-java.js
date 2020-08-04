@@ -162,7 +162,7 @@ class JavaSetup extends EventEmitter {
 
     if (downloadLocation.endsWith(".tar.gz")) {
       const gunzip = zlib.createGunzip();
-      const extractor = tar.extract({path: this.tempFolder});
+      const extractor = tar.extract(this.tempFolder);
       const firstExtraction = fse.createReadStream(downloadLocation).pipe(gunzip).pipe(extractor);
       await new Promise((resolve, reject) => {
         firstExtraction.on('end', () => {
