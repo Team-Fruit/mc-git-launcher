@@ -14,10 +14,10 @@ const {exec} = require('child_process');
 const JAVA_MANIFEST_URL = 'https://cdn.assets-gdevs.com/openjdk8.json';
 
 class JavaSetup extends EventEmitter {
-  constructor({userData}) {
+  constructor({runtimeFolder, tempFolder}) {
     super();
-    this.userData = userData;
-    this.tempFolder = path.join(this.userData, 'temp');
+    this.runtimeFolder = runtimeFolder;
+    this.tempFolder = tempFolder;
   }
 
   convertOSToJavaFormat(ElectronFormat) {
@@ -72,17 +72,79 @@ class JavaSetup extends EventEmitter {
     });
   }
 
-  async installJava() {
+  async initalizeJava() {
     const javaManifest = (await this.getJavaManifest()).data;
+    if (!await this.isLatestJavaDownloaded(javaManifest, true))
+      await this.installJava(javaManifest);
+    return this.getJavaPath(javaManifest);
+  }
+
+  async getJavaPath(meta) {
     const javaOs = this.convertOSToJavaFormat(process.platform);
-    const javaMeta = javaManifest.find(v => v.os === javaOs);
+    const javaMeta = meta.find(v => v.os === javaOs);
+    const javaFolder = path.join(
+      this.runtimeFolder,
+      javaMeta.version_data.openjdk_version
+    );
+    // Check if it's downloaded, if it's latest version and if it's a valid download
+    let isValid = true;
+
+    const javaExecutable = path.join(
+      javaFolder,
+      'bin',
+      `java${javaOs === 'windows' ? '.exe' : ''}`
+    );
+    return javaExecutable;
+  }
+
+  async isLatestJavaDownloaded(meta, retry) {
+    const javaOs = this.convertOSToJavaFormat(process.platform);
+    const javaMeta = meta.find(v => v.os === javaOs);
+    const javaFolder = path.join(
+      this.runtimeFolder,
+      javaMeta.version_data.openjdk_version
+    );
+    // Check if it's downloaded, if it's latest version and if it's a valid download
+    let isValid = true;
+
+    const javaExecutable = path.join(
+      javaFolder,
+      'bin',
+      `java${javaOs === 'windows' ? '.exe' : ''}`
+    );
+    try {
+      await fse.access(javaFolder);
+      await promisify(exec)(`"${javaExecutable}" -version`);
+    } catch (err) {
+      console.log('Java is not ready');
+
+      if (retry) {
+        if (process.platform !== 'win32') {
+          try {
+            await promisify(exec)(`chmod +x "${javaExecutable}"`);
+            await promisify(exec)(`chmod 755 "${javaExecutable}"`);
+          } catch {
+            // swallow error
+          }
+        }
+
+        return this.isLatestJavaDownloaded(meta);
+      }
+
+      isValid = false;
+    }
+    return isValid;
+  };
+
+  async installJava(meta) {
+    const javaOs = this.convertOSToJavaFormat(process.platform);
+    const javaMeta = meta.find(v => v.os === javaOs);
     const {
       version_data: {openjdk_version: version},
       binary_link: url,
       release_name: releaseName
     } = javaMeta;
-    const javaBaseFolder = path.join(this.userData, 'java');
-    await fse.remove(javaBaseFolder);
+    await fse.remove(this.runtimeFolder);
     const downloadLocation = path.join(this.tempFolder, path.basename(url));
 
     await this.downloadFile(downloadLocation, url, p => {
@@ -101,7 +163,7 @@ class JavaSetup extends EventEmitter {
     if (downloadLocation.endsWith(".tar.gz")) {
       const gunzip = zlib.createGunzip();
       const extractor = tar.extract({path: this.tempFolder});
-      const firstExtraction = fs.createReadStream(downloadLocation).pipe(gunzip).pipe(extractor);
+      const firstExtraction = fse.createReadStream(downloadLocation).pipe(gunzip).pipe(extractor);
       await new Promise((resolve, reject) => {
         firstExtraction.on('end', () => {
           resolve();
@@ -120,14 +182,14 @@ class JavaSetup extends EventEmitter {
       process.platform === 'darwin'
         ? path.join(this.tempFolder, `${releaseName}-jre`, 'Contents', 'Home')
         : path.join(this.tempFolder, `${releaseName}-jre`);
-    await fse.move(directoryToMove, path.join(javaBaseFolder, version));
+    await fse.move(directoryToMove, path.join(this.runtimeFolder, version));
 
     await fse.remove(path.join(this.tempFolder, `${releaseName}-jre`));
 
     const ext = process.platform === 'win32' ? '.exe' : '';
 
     if (process.platform !== 'win32') {
-      const execPath = path.join(javaBaseFolder, version, 'bin', `java${ext}`);
+      const execPath = path.join(this.runtimeFolder, version, 'bin', `java${ext}`);
 
       await promisify(exec)(`chmod +x "${execPath}"`);
       await promisify(exec)(`chmod 755 "${execPath}"`);

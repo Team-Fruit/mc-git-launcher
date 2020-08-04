@@ -71,6 +71,11 @@ ipcMain.handle('mcgit.java', async (event, data) => {
 })
 
 ipcMain.handle('mcgit.launch', async (event, data) => {
+  const javaExecutable = await new JavaSetup({
+    runtimeFolder: path.resolve('minecraft/runtime'),
+    tempFolder: path.resolve('minecraft/temp'),
+  }).initalizeJava()
+
   const auth = Authenticator.getAuth(data.mc.email, data.mc.password)
   const forge = await findForge(data.local)
   const modpackOpts = JSON.parse(await fs.readFile(path.join(data.local, 'modpack.json'), 'utf8'))
@@ -87,6 +92,7 @@ ipcMain.handle('mcgit.launch', async (event, data) => {
     ...userOpts,
     authorization: auth,
     root: data.local,
+    javaPath: javaExecutable,
   }
   opts.overrides = {
     directory: path.resolve(path.join('minecraft/versions', opts.version.number)), // where the Minecraft jar and version json are located.
