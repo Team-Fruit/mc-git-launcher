@@ -112,6 +112,7 @@
         </v-btn>
       </template>
     </v-snackbar>
+    <v-progress-linear :value="progress.runtime"></v-progress-linear>
   </v-container>
 </template>
 
@@ -140,13 +141,22 @@
           show: false,
           required: value => !!value || 'Required.',
         },
+        progress: {
+          runtime: 0,
+          modpack: 0,
+        }
       }
+    },
+    created() {
+      api.on('java-progress', (event, value) => {
+        this.progress.runtime = value
+      })
     },
     methods: {
       notification(newValue) {
         this.text = newValue.success ? ('Success: ' + newValue.result) : ('Failed: ' + newValue.reason)
         this.snackbar = true
-      }
+      },
     }
   }
 </script>

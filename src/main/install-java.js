@@ -144,13 +144,19 @@ class JavaSetup extends EventEmitter {
       binary_link: url,
       release_name: releaseName
     } = javaMeta;
+
+    this.emit('java-download-progress', -1);
+
     await fse.remove(this.runtimeFolder);
     const downloadLocation = path.join(this.tempFolder, path.basename(url));
 
     await this.downloadFile(downloadLocation, url, p => {
       // ipcRenderer.invoke('update-progress-bar', parseInt(p, 10) / 100);
       // setDownloadPercentage(parseInt(p, 10));
+      this.emit('java-download-progress', parseInt(p, 10));
     });
+
+    this.emit('java-download-progress', -1);
 
     // ipcRenderer.invoke('update-progress-bar', -1);
     // setDownloadPercentage(null);

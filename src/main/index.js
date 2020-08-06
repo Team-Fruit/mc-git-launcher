@@ -71,11 +71,12 @@ ipcMain.handle('mcgit.java', async (event, data) => {
 })
 
 ipcMain.handle('mcgit.launch', async (event, data) => {
+  const sender = event.sender
   const javaSetup = new JavaSetup({
     runtimeFolder: path.resolve('minecraft/runtime'),
     tempFolder: path.resolve('minecraft/temp'),
   })
-  javaSetup.on('progress', e => ipcMain.emit('java-download-progress', e))
+  javaSetup.on('java-download-progress', e => sender.send('mcgit.java-progress', e))
   const javaExecutable = await javaSetup.initalizeJava()
 
   const auth = Authenticator.getAuth(data.mc.email, data.mc.password)
