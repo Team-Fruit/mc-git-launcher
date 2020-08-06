@@ -1,19 +1,22 @@
-const http = require("http");
 const path = require("path");
-const {Nuxt, Builder} = require("nuxt");
 
 const mainDir = path.join(__dirname, "src/main/");
 const rendererDir = path.join(__dirname, "src/renderer/");
 
-const config = require(path.join(rendererDir, "nuxt.config.js"));
-config.rootDir = path.resolve(rendererDir);
-
-const nuxt = new Nuxt(config);
-const builder = new Builder(nuxt);
-const server = http.createServer(nuxt.render);
+const isDev = process.env.NODE_ENV === "development";
 
 let _NUXT_URL_ = "";
-if (config.dev) {
+if (isDev) {
+  const config = require(path.join(rendererDir, "nuxt.config.js"));
+  config.rootDir = path.resolve(rendererDir);
+
+  const http = require("http");
+  const {Nuxt, Builder} = require("nuxt");
+
+    const nuxt = new Nuxt(config);
+  const builder = new Builder(nuxt);
+  const server = http.createServer(nuxt.render);
+
   builder.build().catch(err => {
     console.error(err);
     process.exit(1);
@@ -49,7 +52,9 @@ const newWin = () => {
     }
   });
   win.on("closed", () => (win = null));
-  if (config.dev) {
+  if (isDev) {
+    const http = require("http");
+
     const pollServer = () => {
       http
         .get(_NUXT_URL_, res => {
