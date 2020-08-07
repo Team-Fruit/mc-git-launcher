@@ -18,7 +18,11 @@
       api.on('java-progress', (event, value) => {
         this.progress.runtime = value
       })
-
+      api.action('java', {})
+        .then(result => {
+          this.$router.push('main')
+        })
+        .catch(err => alert(err))
     }
   }
 </script>

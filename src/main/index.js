@@ -9,6 +9,8 @@ const launcher = new Client();
 launcher.on('debug', (e) => console.log(e));
 launcher.on('data', (e) => console.log(e));
 
+let javaExecutable = null;
+
 ipcMain.handle('mcgit.clone', async (event, data) => {
   return mcgit.clone({
     dir: data.local,
@@ -52,32 +54,33 @@ async function findForge(dir) {
 }
 
 ipcMain.handle('mcgit.java', async (event, data) => {
-  return new JavaSetup({
-    userData: path.resolve(path.join('minecraft'))
-  }).installJava()
-    .then(result => {
-      console.log(result)
-      return {
-        success: true,
-        result: 'OK!',
-      }
-    }).catch(err => {
-      console.log('Error: ', err)
-      return {
-        success: false,
-        reason: err,
-      }
+  try {
+    const sender = event.sender
+    const javaSetup = new JavaSetup({
+      runtimeFolder: path.resolve('minecraft/runtime'),
+      tempFolder: path.resolve('minecraft/temp'),
     })
+    javaSetup.on('java-download-progress', e => sender.send('mcgit.java-progress', e))
+    javaExecutable = await javaSetup.initalizeJava()
+    return {
+      success: true,
+      result: 'OK!',
+    }
+  } catch (err) {
+    console.log('Error: ', err)
+    return {
+      success: false,
+      reason: err,
+    }
+  }
 })
 
 ipcMain.handle('mcgit.launch', async (event, data) => {
-  const sender = event.sender
-  const javaSetup = new JavaSetup({
-    runtimeFolder: path.resolve('minecraft/runtime'),
-    tempFolder: path.resolve('minecraft/temp'),
-  })
-  javaSetup.on('java-download-progress', e => sender.send('mcgit.java-progress', e))
-  const javaExecutable = await javaSetup.initalizeJava()
+  if (!javaExecutable)
+    return {
+      success: false,
+      reason: 'java is not ready.',
+    }
 
   const auth = Authenticator.getAuth(data.mc.email, data.mc.password)
   const forge = await findForge(data.local)

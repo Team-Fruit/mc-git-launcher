@@ -18,6 +18,7 @@ class JavaSetup extends EventEmitter {
     super();
     this.runtimeFolder = runtimeFolder;
     this.tempFolder = tempFolder;
+    this.meta = null;
   }
 
   convertOSToJavaFormat(ElectronFormat) {
@@ -34,7 +35,17 @@ class JavaSetup extends EventEmitter {
   }
 
   async getJavaManifest() {
-    return axios.get(JAVA_MANIFEST_URL);
+    if (this.meta)
+      return this.meta;
+    const metaFile = path.join(this.runtimeFolder, 'runtime.json');
+    this.meta = await fse.readFile(metaFile, 'utf8')
+      .then(e => JSON.parse(e))
+      .catch(async err => {
+        const meta = (await axios.get(JAVA_MANIFEST_URL)).data;
+        await fse.writeFile(metaFile, JSON.stringify(meta, null, 2));
+        return meta;
+      });
+    return this.meta;
   }
 
   async downloadFile(fileName, url, onProgress) {
@@ -73,7 +84,7 @@ class JavaSetup extends EventEmitter {
   }
 
   async initalizeJava() {
-    const javaManifest = (await this.getJavaManifest()).data;
+    const javaManifest = await this.getJavaManifest();
     if (!await this.isLatestJavaDownloaded(javaManifest, true))
       await this.installJava(javaManifest);
     return this.getJavaPath(javaManifest);
