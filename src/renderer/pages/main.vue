@@ -112,6 +112,7 @@
         </v-btn>
       </template>
     </v-snackbar>
+    <v-progress-linear :value="progress.modpack"></v-progress-linear>
   </v-container>
 </template>
 
@@ -141,14 +142,14 @@
           required: value => !!value || 'Required.',
         },
         progress: {
-          runtime: 0,
+          download: 0,
           modpack: 0,
         }
       }
     },
     created() {
-      api.on('java-progress', (event, value) => {
-        this.progress.runtime = value
+      api.on('modpack-progress', (event, value) => {
+        this.progress.modpack = value
       })
     },
     methods: {

@@ -5,10 +5,6 @@ const mcgit = require('./mcgit')
 const {JavaSetup} = require('./install-java')
 const {Client, Authenticator} = require('minecraft-launcher-core');
 
-const launcher = new Client();
-launcher.on('debug', (e) => console.log(e));
-launcher.on('data', (e) => console.log(e));
-
 let javaExecutable = null;
 
 ipcMain.handle('mcgit.clone', async (event, data) => {
@@ -76,11 +72,24 @@ ipcMain.handle('mcgit.java', async (event, data) => {
 })
 
 ipcMain.handle('mcgit.launch', async (event, data) => {
+  const sender = event.sender
+
   if (!javaExecutable)
     return {
       success: false,
       reason: 'java is not ready.',
     }
+
+  const launcher = new Client();
+  launcher.on('debug', (e) => console.log(e));
+  launcher.on('data', (e) => console.log(e));
+  launcher.on('progress', (e) => console.log(e));
+  launcher.on('package-extract', (e) => console.log(e));
+  launcher.on('download', (e) => console.log(e));
+  launcher.on('close', (e) => console.log(e));
+
+  // launcher.on('download-status', e => sender.send('mcgit.download-progress', 100 * e.current / e.total));
+  launcher.on('progress', e => sender.send('mcgit.modpack-progress', 100 * e.task / e.total));
 
   const auth = Authenticator.getAuth(data.mc.email, data.mc.password)
   const forge = await findForge(data.local)
