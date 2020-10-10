@@ -113,6 +113,7 @@
       </template>
     </v-snackbar>
     <v-progress-linear :value="progress.modpack"></v-progress-linear>
+    <nuxt-link to="/test">aaa</nuxt-link>
   </v-container>
 </template>
 
