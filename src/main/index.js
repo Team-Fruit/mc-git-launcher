@@ -10,8 +10,8 @@ let javaExecutable = null;
 ipcMain.handle('mcgit.clone', async (event, data) => {
   return mcgit.clone({
     dir: data.local,
-    url: data.remote,
-    ours: 'master',
+    url: data.remote.substr(data.remote.length - 4) === ".git" ? data.remote : data.remote + ".git",
+    ours: 'main',
   })
 })
 
@@ -19,14 +19,14 @@ ipcMain.handle('mcgit.fetch', async (event, data) => {
   return mcgit.fetch({
     dir: data.local,
     url: data.remote,
-    ours: 'master',
+    ours: 'main',
   })
 })
 
 ipcMain.handle('mcgit.update.force', async (event, data) => {
   return mcgit.updateHard({
     dir: data.local,
-    ours: 'master',
+    ours: 'main',
   })
 })
 
