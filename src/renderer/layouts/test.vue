@@ -57,13 +57,6 @@
       height="50">
 
     </v-bottom-navigation>
-    <!--
-    <v-footer
-      app
-    >
-      <span>&copy; {{ new Date().getFullYear() }} iaproject </span>
-    </v-footer>
-    -->
   </v-app>
 </template>
 
@@ -80,7 +73,7 @@ export default {
 </script>
 
 <style>
-.v-navigation-drawer__content::-webkit-scrollbar {
+::-webkit-scrollbar {
   display: none;
   width: 2px;
 }
