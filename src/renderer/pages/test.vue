@@ -1,12 +1,19 @@
 <template>
-  <div>this is test page!</div>
+  <div>this is test page! {{ test }}</div>
 </template>
 
-<script>
-export default {
-  layout: "test",
-  name: "test"
-}
+<script lang="ts">
+import Vue from 'vue'
+
+export default Vue.extend({
+  layout: 'test',
+  name: "test" as string,
+  data() {
+    return {
+      test: "test" as string
+    }
+  }
+})
 </script>
 
 <style scoped>
