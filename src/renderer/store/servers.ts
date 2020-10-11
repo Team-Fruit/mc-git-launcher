@@ -1,5 +1,6 @@
 import {Module, VuexModule, Mutation, Action} from 'vuex-module-decorators'
 
+//aaassssaa
 @Module({
   name: 'servers',
   stateFactory: true,
@@ -19,7 +20,7 @@ class Servers extends VuexModule {
 }
 
 class Server {
-  private name: string = ""
+  private name: string = "aaaaaaaaa sadasdaaaaaad  adsaaad  a"
   private iconurl: string = ""
   private modpacks: Modpack[] = []
 
@@ -38,5 +39,7 @@ class Server {
 }
 
 class Modpack {
-  private name: string = ""
+  private name: string = " "
 }
+
+export {Servers, Server, Modpack}

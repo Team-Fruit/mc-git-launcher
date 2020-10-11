@@ -34,8 +34,8 @@ module.exports = {
    ** Nuxt.js dev-modules
    */
   buildModules: [
-    "@nuxtjs/vuetify",
-    '@nuxt/typescript-build'
+    '@nuxt/typescript-build',
+    "@nuxtjs/vuetify"
   ],
   /*
    ** Nuxt.js modules
@@ -51,6 +51,7 @@ module.exports = {
   /*
    ** Build configuration
    */
+  watch: ['../store/servers.ts'],
   build: {
     /*
      ** You can extend webpack config here
