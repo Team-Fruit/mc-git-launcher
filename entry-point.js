@@ -12,18 +12,18 @@ if (isDev) {
 
   const http = require("http");
   const {Nuxt, Builder} = require("nuxt");
-
-    const nuxt = new Nuxt(config);
-  const builder = new Builder(nuxt);
-  const server = http.createServer(nuxt.render);
-
-  builder.build().catch(err => {
-    console.error(err);
-    process.exit(1);
+  const nuxt = new Nuxt(config);
+  nuxt.ready().then(() => {
+    const builder = new Builder(nuxt);
+    const server = http.createServer(nuxt.render);
+    builder.build().catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+    server.listen();
+    _NUXT_URL_ = `http://localhost:${server.address().port}`;
+    console.log(`Nuxt working on ${_NUXT_URL_}`);
   });
-  server.listen();
-  _NUXT_URL_ = `http://localhost:${server.address().port}`;
-  console.log(`Nuxt working on ${_NUXT_URL_}`);
 } else {
   _NUXT_URL_ = `file:///index.html`;
 }

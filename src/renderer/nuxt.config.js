@@ -42,16 +42,11 @@ module.exports = {
    */
   modules: [],
 
-  router: {
-    mode: "hash"
-  },
-
   dev: process.env.NODE_ENV === "development",
 
   /*
    ** Build configuration
    */
-  watch: ['../store/servers.ts'],
   build: {
     /*
      ** You can extend webpack config here

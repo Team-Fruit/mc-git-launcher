@@ -1,24 +1,23 @@
 <template>
-  <div>this is test page! {{ Servers.length }}</div>
+  <div>this is test page! aaa {{ posts }}</div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import {mapState} from 'vuex'
-//import {Servers} from '~/store/servers'
+import {Component} from "vue-property-decorator";
+import {feedStore} from "~/store";
 
-export default Vue.extend({
-  layout: 'test',
-  name: "test" as string,
-  data() {
-    return {
-      test: "te  aa sast " as string
-    }
-  },
-  computed: {
-    ...mapState('servers', ['Servers'])
-  }
+@Component({
+  layout: 'test'
 })
+export default class Test extends Vue {
+  get posts() {
+    return feedStore.posts
+  }
+  async created() {
+    feedStore.addPost()
+  }
+}
 </script>
 
 <style scoped>
