@@ -1,36 +1,21 @@
-// tsconfig.json
 {
   "compilerOptions": {
-    "experimentalDecorators": true,
     "target": "ES2018",
     "module": "ESNext",
     "moduleResolution": "Node",
-    "lib": [
-      "ESNext",
-      "ESNext.AsyncIterable",
-      "DOM"
-    ],
+    "lib": ["ESNext", "ESNext.AsyncIterable", "DOM"],
     "esModuleInterop": true,
     "allowJs": true,
     "sourceMap": true,
     "strict": true,
     "noEmit": true,
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
-      "~/*": [
-        "./*"
-      ],
-      "@/*": [
-        "./*"
-      ]
+      "~/*": ["./*"],
+      "@/*": ["./*"]
     },
-    "types": [
-      "@types/node",
-      "@nuxt/types",
-      "vuetify"
-    ]
+    "types": ["@types/node", "@nuxt/types","vuetify"],
+    "experimentalDecorators": true
   },
-  "exclude": [
-    "../../node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

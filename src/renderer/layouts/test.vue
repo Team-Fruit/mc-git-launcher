@@ -9,11 +9,12 @@
       mini-variant-width="70"
     >
       <v-list class="ssss">
-        <v-list-item class="pa-1" v-for="server in Servers" :key="server.name">
+        <v-list-item class="pa-1">
           <v-avatar
             size="55"
           >
-            <v-img src="https://avatars2.githubusercontent.com/u/17563842?s=460&u=65463cc37658fedcba44c84664dbba9fe1113970&v=4"></v-img>
+            <v-img
+              src="https://avatars2.githubusercontent.com/u/17563842?s=460&u=65463cc37658fedcba44c84664dbba9fe1113970&v=4"></v-img>
           </v-avatar>
           <v-list-item-content>
             <v-list-item-title>おしらせ</v-list-item-title>
@@ -34,21 +35,15 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import {mapState, mapMutations} from 'vuex'
+//import {feedStore} from "~/store";
+import {Vue, Component} from "vue-property-decorator";
 
-export default Vue.extend({
-  data() {
-    return {
-      drawer: true,
-      theme: 0
-    }
-  },
-  computed: {
-    ...mapState('servers', ['Servers'])
-  },
-  name: "test"
+@Component({
+  name: "testlayout"
 })
+export default class TestLayout extends Vue {
+  drawer:boolean = true
+}
 </script>
 
 <style>
