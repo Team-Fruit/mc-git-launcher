@@ -1,21 +1,30 @@
 <template>
-  <div>this is test page! aaa {{ posts }}</div>
+  <div>this is test page! aaa {{ servers }}
+    <v-btn v-on:click="addServer()">add !</v-btn>
+    <v-btn v-on:click="clearServer()">clear!</v-btn>
+  </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import {Component} from "vue-property-decorator";
-import {feedStore} from "~/store";
+import {serverStore} from "~/store";
 
 @Component({
   layout: 'test'
 })
 export default class Test extends Vue {
-  get posts() {
-    return feedStore.posts
+  get servers() {
+    return serverStore.getServerLength
   }
   async created() {
-    feedStore.addPost()
+    // serverStore.addServer("susisusiServer")
+  }
+  addServer() {
+    serverStore.addServer("susisusiServer" + new Date())
+  }
+  clearServer() {
+    serverStore.clearServer()
   }
 }
 </script>

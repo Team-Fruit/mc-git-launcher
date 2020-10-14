@@ -51,6 +51,16 @@ const newWin = () => {
       preload: path.resolve(path.join(mainDir, "preload.js"))
     }
   });
+
+  win.webContents.on('dom-ready', function(e) {
+    win.webContents.executeJavaScript('' +
+      'var http = new XMLHttpRequest();' +
+      'var s = location.href.split("/");' +
+      'http.open("HEAD",location.href.replace(s[s.length-1],"")+"_nuxt/runtime.js",false);' +
+      'http.send();' +
+      'if(http.status == 404) {location.href="/redirect?p=" + encodeURI(window.location.pathname)}')
+  })
+
   win.on("closed", () => (win = null));
   if (isDev) {
     const http = require("http");

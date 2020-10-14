@@ -1,5 +1,6 @@
 module.exports = {
-  mode: "spa",
+  ssr: false,
+  telemetry: false,
   /*
    ** Headers of the page
    */
@@ -43,6 +44,11 @@ module.exports = {
   modules: [],
 
   dev: process.env.NODE_ENV === "development",
+  /*
+  router: {
+    mode: "hash"
+  },
+   */
 
   /*
    ** Build configuration

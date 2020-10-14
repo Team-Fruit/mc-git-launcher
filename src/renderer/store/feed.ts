@@ -9,7 +9,6 @@ export default class Feed extends VuexModule {
     this.posts = [...this.posts, "ssushisushi"]
   }
 
-
   public get postLength() {
     return this.posts.length
   }
