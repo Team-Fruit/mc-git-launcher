@@ -17,12 +17,18 @@ export default class ServerIndex extends Vue {
   serverId: string = this.$route.params.serverId
   server: Server = serverStore.servers.filter(s => s.name == this.serverId)[0]
 
+  constructor() {
+    super();
+    this.serverId = this.$route.params.serverId
+    this.server = new Server("")
+  }
+
   get servers() {
     return serverStore.servers
   }
 
   async created () {
-
+    //server
   }
 }
 </script>
