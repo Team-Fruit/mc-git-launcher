@@ -60,7 +60,7 @@ export default class TestLayout extends Vue {
   }
 
   addServer() {
-    serverStore.addServer("unchi" + new Date())
+    serverStore.addServer("unchi" + new Date().getMilliseconds())
   }
 }
 </script>
