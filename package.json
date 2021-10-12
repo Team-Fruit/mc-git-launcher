@@ -52,7 +52,7 @@
     "@nuxt/typescript-build": "^2.0.3",
     "@nuxtjs/vuetify": "^1.11.2",
     "cross-env": "^7.0.2",
-    "electron": "^9.3.2",
+    "electron": "^11.5.0",
     "electron-builder": "^22.8.1",
     "nuxt": "^2.14.6",
     "vuex-module-decorators": "^1.0.1"
